@@ -382,8 +382,8 @@ export class Text extends Sprite
         const padding = style.trim ? 0 : style.padding;
         const baseTexture = texture.baseTexture;
 
-        texture.trim.width = texture._frame.width = Math.ceil(canvas.width / this._resolution);
-        texture.trim.height = texture._frame.height = Math.ceil(canvas.height / this._resolution);
+        texture.trim.width = texture._frame.width = canvas.width / this._resolution;
+        texture.trim.height = texture._frame.height = canvas.height / this._resolution;
         texture.trim.x = -padding;
         texture.trim.y = -padding;
 
@@ -480,8 +480,8 @@ export class Text extends Sprite
         // should also take padding into account, padding can offset the gradient
         const padding = style.padding || 0;
 
-        const width = Math.ceil(this.canvas.width / this._resolution) - dropShadowCorrection - (padding * 2);
-        const height = Math.ceil(this.canvas.height / this._resolution) - dropShadowCorrection - (padding * 2);
+        const width = (this.canvas.width / this._resolution) - dropShadowCorrection - (padding * 2);
+        const height = (this.canvas.height / this._resolution) - dropShadowCorrection - (padding * 2);
 
         // make a copy of the style settings, so we can manipulate them later
         const fill = fillStyle.slice();

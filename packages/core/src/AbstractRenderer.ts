@@ -320,8 +320,8 @@ export abstract class AbstractRenderer extends EventEmitter
 
         const renderTexture = RenderTexture.create(
             {
-                width: region.width | 0,
-                height: region.height | 0,
+                width: region.width,
+                height: region.height,
                 scaleMode,
                 resolution,
             });
