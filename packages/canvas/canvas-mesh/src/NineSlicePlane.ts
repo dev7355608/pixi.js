@@ -90,20 +90,37 @@ NineSlicePlane.prototype._renderCanvas = function _renderCanvas(renderer: Canvas
 
     context.globalAlpha = this.worldAlpha;
     renderer.setBlendMode(this.blendMode);
-    renderer.setContextTransform(transform, this.roundPixels);
+    renderer.setContextTransform(transform, this.roundPixels, 1);
 
     for (let row = 0; row < 3; row++)
     {
         for (let col = 0; col < 3; col++)
         {
             const ind = (col * 2) + (row * 8);
-            const sw = Math.max(1, uvs[col + 1] - uvs[col]);
-            const sh = Math.max(1, uvs[row + 5] - uvs[row + 4]);
-            const dw = Math.max(1, vertices[ind + 10] - vertices[ind]);
-            const dh = Math.max(1, vertices[ind + 11] - vertices[ind + 1]);
+            const sx = uvs[col];
+            const sy = uvs[row + 4];
+            const sw = Math.max(1, uvs[col + 1] - sx);
+            const sh = Math.max(1, uvs[row + 5] - sy);
+            let dx = vertices[ind];
+            let dy = vertices[ind + 1];
+            let dw = vertices[ind + 10] - dx;
+            let dh = vertices[ind + 11] - dy;
 
-            context.drawImage(textureSource, uvs[col], uvs[row + 4], sw, sh,
-                vertices[ind], vertices[ind + 1], dw, dh);
+            dx *= renderer.resolution;
+            dy *= renderer.resolution;
+            dw *= renderer.resolution;
+            dh *= renderer.resolution;
+
+            if (this.roundPixels)
+            {
+                dx = Math.round(dx);
+                dy = Math.round(dy);
+            }
+
+            dw = Math.max(1, dw);
+            dh = Math.max(1, dh);
+
+            context.drawImage(textureSource, sx, sy, sw, sh, dx, dy, dw, dh);
         }
     }
 };

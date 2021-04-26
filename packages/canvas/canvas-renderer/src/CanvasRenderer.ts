@@ -388,8 +388,8 @@ export class CanvasRenderer extends AbstractRenderer
                 mat.b * localResolution,
                 mat.c * localResolution,
                 mat.d * localResolution,
-                (mat.tx * resolution) | 0,
-                (mat.ty * resolution) | 0
+                Math.round(mat.tx * resolution),
+                Math.round(mat.ty * resolution)
             );
         }
         else

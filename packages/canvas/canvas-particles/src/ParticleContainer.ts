@@ -85,6 +85,17 @@ ParticleContainer.prototype.renderCanvas = function renderCanvas(renderer: Canva
             finalHeight = frame.height;
         }
 
+        let dx = positionX * renderer.resolution;
+        let dy = positionY * renderer.resolution;
+        const dw = finalWidth * renderer.resolution;
+        const dh = finalHeight * renderer.resolution;
+
+        if (this.roundPixels)
+        {
+            dx = Math.round(dx);
+            dy = Math.round(dy);
+        }
+
         const resolution = child._texture.baseTexture.resolution;
 
         context.drawImage(
@@ -93,10 +104,10 @@ ParticleContainer.prototype.renderCanvas = function renderCanvas(renderer: Canva
             frame.y * resolution,
             frame.width * resolution,
             frame.height * resolution,
-            positionX * renderer.resolution,
-            positionY * renderer.resolution,
-            finalWidth * renderer.resolution,
-            finalHeight * renderer.resolution
+            dx,
+            dy,
+            dw,
+            dh
         );
     }
 };
