@@ -1,5 +1,5 @@
 import { Shader, State } from '@pixi/core';
-import { Point, Polygon } from '@pixi/math';
+import { Point, Polygon, Transform } from '@pixi/math';
 import { BLEND_MODES, DRAW_MODES } from '@pixi/constants';
 import { Container } from '@pixi/display';
 import { settings } from '@pixi/settings';
@@ -47,6 +47,7 @@ export class Mesh<T extends Shader = MeshMaterial> extends Container
     private vertexDirty: number;
     private _transformID: number;
     private _roundPixels: boolean;
+    private _roundPixelsID: number;
     private batchUvs: MeshBatchUvs;
 
     // Internal-only properties
@@ -151,6 +152,8 @@ export class Mesh<T extends Shader = MeshMaterial> extends Container
          * @private
          */
         this._roundPixels = settings.ROUND_PIXELS;
+
+        this._roundPixelsID = -1;
 
         /**
          * Batched UV's are cached for atlas textures
@@ -314,8 +317,37 @@ export class Mesh<T extends Shader = MeshMaterial> extends Container
 
         renderer.batch.flush();
 
+        let verticesBuffer;
+        let vertices;
+
+        if (this._roundPixels)
+        {
+            verticesBuffer = this.geometry.buffers[0];
+            vertices = verticesBuffer.data;
+
+            this.calculateVertices();
+
+            if (this._roundPixelsID === -1)
+            {
+                verticesBuffer.data = this.vertexData;
+                verticesBuffer._updateID++;
+                this._roundPixelsID = verticesBuffer._updateID;
+                this.vertexDirty = this._roundPixelsID + 1;
+            }
+            else
+            {
+                verticesBuffer.data = this.vertexData;
+                verticesBuffer._updateID = this._roundPixelsID;
+            }
+
+            shader.uniforms.translationMatrix = Transform.IDENTITY.worldTransform.toArray(true);
+        }
+        else
+        {
+            shader.uniforms.translationMatrix = this.transform.worldTransform.toArray(true);
+        }
+
         // bind and sync uniforms..
-        shader.uniforms.translationMatrix = this.transform.worldTransform.toArray(true);
         renderer.shader.bind(shader);
 
         // set state..
@@ -326,6 +358,12 @@ export class Mesh<T extends Shader = MeshMaterial> extends Container
 
         // then render it
         renderer.geometry.draw(this.drawMode, this.size, this.start, this.geometry.instanceCount);
+
+        if (this._roundPixels)
+        {
+            verticesBuffer.data = vertices;
+            verticesBuffer._updateID = this.vertexDirty;
+        }
     }
 
     /**
@@ -403,11 +441,12 @@ export class Mesh<T extends Shader = MeshMaterial> extends Container
 
             for (let i = 0; i < vertexData.length; ++i)
             {
-                vertexData[i] = Math.round((vertexData[i] * resolution | 0) / resolution);
+                vertexData[i] = Math.round(vertexData[i] * resolution) / resolution;
             }
         }
 
         this.vertexDirty = vertexDirtyId;
+        this._roundPixelsID = -1;
     }
 
     /**
