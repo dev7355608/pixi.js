@@ -339,7 +339,7 @@ export class Sprite extends Container
 
             for (let i = 0; i < vertexData.length; ++i)
             {
-                vertexData[i] = Math.round((vertexData[i] * resolution | 0) / resolution);
+                vertexData[i] = Math.round(vertexData[i] * resolution) / resolution;
             }
         }
     }
@@ -398,6 +398,16 @@ export class Sprite extends Container
         // xy
         vertexData[6] = (a * w1) + (c * h0) + tx;
         vertexData[7] = (d * h0) + (b * w1) + ty;
+
+        if (this._roundPixels)
+        {
+            const resolution = settings.RESOLUTION;
+
+            for (let i = 0; i < vertexData.length; ++i)
+            {
+                vertexData[i] = Math.round(vertexData[i] * resolution) / resolution;
+            }
+        }
     }
 
     /**
