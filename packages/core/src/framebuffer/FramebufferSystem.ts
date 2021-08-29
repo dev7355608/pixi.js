@@ -388,6 +388,12 @@ export class FramebufferSystem implements ISystem
         {
             gl.deleteRenderbuffer(fbo.msaaBuffer);
             fbo.msaaBuffer = null;
+
+            if (fbo.blitFramebuffer)
+            {
+                fbo.blitFramebuffer.dispose();
+                fbo.blitFramebuffer = null;
+            }
         }
 
         const activeTextures = [];
@@ -548,8 +554,13 @@ export class FramebufferSystem implements ISystem
                 fbo.blitFramebuffer.addColorTexture(0, current.colorTextures[0]);
             }
             framebuffer = fbo.blitFramebuffer;
-            framebuffer.width = current.width;
-            framebuffer.height = current.height;
+
+            if (framebuffer.width !== current.width || framebuffer.height !== current.height)
+            {
+                framebuffer.width = current.width;
+                framebuffer.height = current.height;
+                framebuffer.dirtySize++;
+            }
         }
 
         if (!sourcePixels)
@@ -612,6 +623,11 @@ export class FramebufferSystem implements ISystem
             {
                 gl.deleteRenderbuffer(fbo.stencil);
             }
+        }
+
+        if (fbo.blitFramebuffer)
+        {
+            fbo.blitFramebuffer.dispose();
         }
     }
 
